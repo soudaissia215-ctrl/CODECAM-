@@ -1,0 +1,315 @@
+/* ==========================================
+   CODE CAM — JAVASCRIPT PRINCIPAL
+   Compatible avec index.html et style.css
+========================================== */
+
+"use strict";
+
+/* ==========================================
+   1. MENU DE NAVIGATION MOBILE
+========================================== */
+
+const menuToggle = document.getElementById("menuToggle");
+const navLinks = document.getElementById("navLinks");
+
+if (menuToggle && navLinks) {
+
+    menuToggle.addEventListener("click", function () {
+
+        const isOpen = navLinks.classList.toggle("open");
+
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
+
+        menuToggle.setAttribute(
+            "aria-label",
+            isOpen ? "Fermer le menu" : "Ouvrir le menu"
+        );
+
+        menuToggle.textContent = isOpen ? "✕" : "☰";
+
+    });
+
+    // Fermer le menu après un clic sur un lien.
+
+    const links = navLinks.querySelectorAll("a");
+
+    links.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            navLinks.classList.remove("open");
+
+            menuToggle.setAttribute("aria-expanded", "false");
+
+            menuToggle.setAttribute(
+                "aria-label",
+                "Ouvrir le menu"
+            );
+
+            menuToggle.textContent = "☰";
+
+        });
+
+    });
+
+    // Fermer le menu si l'utilisateur clique ailleurs.
+
+    document.addEventListener("click", function (event) {
+
+        const clickedInsideMenu = navLinks.contains(event.target);
+        const clickedToggle = menuToggle.contains(event.target);
+
+        if (!clickedInsideMenu && !clickedToggle) {
+
+            navLinks.classList.remove("open");
+
+            menuToggle.setAttribute("aria-expanded", "false");
+
+            menuToggle.setAttribute(
+                "aria-label",
+                "Ouvrir le menu"
+            );
+
+            menuToggle.textContent = "☰";
+
+        }
+
+    });
+
+}
+
+
+/* ==========================================
+   2. ANNÉE AUTOMATIQUE DU PIED DE PAGE
+========================================== */
+
+const currentYear = document.getElementById("currentYear");
+
+if (currentYear) {
+    currentYear.textContent = new Date().getFullYear();
+}
+
+
+/* ==========================================
+   3. FORMULAIRE D'INSCRIPTION
+========================================== */
+
+const registrationForm = document.getElementById("registrationForm");
+const formStatus = document.getElementById("formStatus");
+
+if (registrationForm) {
+
+    registrationForm.addEventListener("submit", function (event) {
+
+        // Empêcher le rechargement de la page.
+
+        event.preventDefault();
+
+        // Vérifier les champs obligatoires.
+
+        if (!registrationForm.checkValidity()) {
+
+            registrationForm.reportValidity();
+
+            return;
+
+        }
+
+        // Récupérer les informations du formulaire.
+
+        const fullName = document
+            .getElementById("fullName")
+            .value
+            .trim();
+
+        const level = document
+            .getElementById("level")
+            .value;
+
+        const course = document
+            .getElementById("course")
+            .value;
+
+        const equipment = document
+            .getElementById("equipment")
+            .value;
+
+        const message = document
+            .getElementById("message")
+            .value
+            .trim();
+
+        // Vérification supplémentaire du nom.
+
+        if (fullName.length < 2) {
+
+            if (formStatus) {
+                formStatus.textContent =
+                    "Veuillez saisir votre nom complet.";
+            }
+
+            return;
+
+        }
+
+        // Construire le message WhatsApp.
+
+        const whatsappMessage = [
+            "Bonjour CODE CAM ! 👋",
+            "",
+            "Je souhaite obtenir des informations sur les formations.",
+            "",
+            "📋 DEMANDE D'INSCRIPTION",
+            "",
+            "👤 Nom : " + fullName,
+            "🎓 Niveau : " + level,
+            "💻 Formation souhaitée : " + course,
+            "📱 Matériel disponible : " + equipment,
+            "",
+            "💬 Message complémentaire :",
+            message || "Aucun message supplémentaire.",
+            "",
+            "📅 Session annoncée : du 30 octobre au 30 décembre 2026.",
+            "",
+            "Merci de me communiquer les modalités d'inscription."
+        ].join("\n");
+
+        // Encoder le message pour une URL.
+
+        const encodedMessage = encodeURIComponent(whatsappMessage);
+
+        // Numéro WhatsApp de CODE CAM.
+
+        const whatsappNumber = "237690710728";
+
+        // Créer le lien WhatsApp.
+
+        const whatsappURL =
+            "https://wa.me/" +
+            whatsappNumber +
+            "?text=" +
+            encodedMessage;
+
+        // Afficher une confirmation.
+
+        if (formStatus) {
+
+            formStatus.textContent =
+                "Préparation de ton message WhatsApp…";
+
+        }
+
+        // Ouvrir WhatsApp dans un nouvel onglet
+        // ou dans l'application selon le téléphone.
+
+        const whatsappWindow = window.open(
+            whatsappURL,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+        // Certains navigateurs mobiles peuvent bloquer
+        // l'ouverture automatique d'un nouvel onglet.
+
+        if (!whatsappWindow) {
+
+            window.location.href = whatsappURL;
+
+        }
+
+    });
+
+}
+
+
+/* ==========================================
+   4. ANIMATION D'APPARITION DES CARTES
+========================================== */
+
+// Les cartes restent visibles si IntersectionObserver
+// n'est pas disponible dans le navigateur.
+
+if ("IntersectionObserver" in window) {
+
+    const animatedElements = document.querySelectorAll(
+        ".feature-card, .project-card, .service-item, .step-card"
+    );
+
+    const observer = new IntersectionObserver(
+
+        function (entries, currentObserver) {
+
+            entries.forEach(function (entry) {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add("is-visible");
+
+                    currentObserver.unobserve(entry.target);
+
+                }
+
+            });
+
+        },
+
+        {
+            threshold: 0.12
+        }
+
+    );
+
+    animatedElements.forEach(function (element) {
+
+        element.classList.add("reveal");
+
+        observer.observe(element);
+
+    });
+
+}
+
+
+/* ==========================================
+   5. PROTECTION CONTRE LES ERREURS DE CHAMPS
+========================================== */
+
+const formInputs = document.querySelectorAll(
+    "#registrationForm input, " +
+    "#registrationForm select, " +
+    "#registrationForm textarea"
+);
+
+formInputs.forEach(function (input) {
+
+    input.addEventListener("input", function () {
+
+        if (formStatus) {
+            formStatus.textContent = "";
+        }
+
+    });
+
+    input.addEventListener("change", function () {
+
+        if (formStatus) {
+            formStatus.textContent = "";
+        }
+
+    });
+
+});
+
+
+/* ==========================================
+   6. MESSAGE DANS LA CONSOLE
+========================================== */
+
+console.log(
+    "%c CODE CAM ",
+    "background:#00e5ff;color:#080d19;font-size:18px;font-weight:bold;padding:8px;"
+);
+
+console.log(
+    "Le JavaScript de CODE CAM est chargé correctement."
+); 
